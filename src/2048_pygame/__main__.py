@@ -100,15 +100,21 @@ while running:
             running = False
         elif event.type == pygame.KEYDOWN:
             if not game_state.game_over:
+                key_pressed = False
                 if event.key == pygame.K_UP:
                     game_state.move_up()
+                    key_pressed = True
                 elif event.key == pygame.K_DOWN:
                     game_state.move_down()
+                    key_pressed = True
                 elif event.key == pygame.K_LEFT:
                     game_state.move_left()
+                    key_pressed = True
                 elif event.key == pygame.K_RIGHT:
                     game_state.move_right()
-                if not game_state.game_over:
+                    key_pressed = True
+
+                if key_pressed and not game_state.game_over:
                     game_state.place_random_tile()
                     game_state.game_over = game_state.is_game_over()
 
