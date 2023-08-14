@@ -59,14 +59,16 @@ class GameState:
         self.board = new_board
 
     def move_up(self):
-        self.board = list(map(list, zip(*self.board[::-1])))
+        self.board = list(map(list, zip(*self.board))) # 90度反時計回りに回転
         self.move_tiles_left()
-        self.board = list(map(list, zip(*self.board[::-1])))
+        self.board = list(map(list, zip(*self.board[::-1]))) # 90度時計回りに回転
+        self.board = [row[::-1] for row in self.board] # 左右反転を解除
 
     def move_down(self):
-        self.board = list(map(list, zip(*self.board)))
+        self.board = list(map(list, zip(*self.board[::-1]))) # 90度時計回りに回転
         self.move_tiles_left()
-        self.board = list(map(list, zip(*self.board)))
+        self.board = list(map(list, zip(*self.board))) # 90度反時計回りに回転
+        self.board = self.board[::-1] # 上下反転を解除
 
     def move_left(self):
         self.move_tiles_left()
