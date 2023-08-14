@@ -90,6 +90,7 @@ class GameState:
 # ゲームの状態を初期化
 game_state = GameState()
 game_state.place_random_tile()
+game_state.place_random_tile()
 
 # ゲームループ
 running = True
