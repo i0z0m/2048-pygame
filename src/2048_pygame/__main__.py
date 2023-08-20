@@ -34,6 +34,7 @@ class GameState:
         self.board = [[0] * 4 for _ in range(4)]
         self.score = 0
         self.game_over = False
+        self.game_clear = False
 
     def place_random_tile(self):
         empty_tiles = [(i, j) for i in range(4)
@@ -99,7 +100,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
-            if not game_state.game_over:
+            if not game_state.game_clear and not game_state.game_over:
                 key_pressed = False
                 if event.key == pygame.K_UP:
                     game_state.move_up()
@@ -117,6 +118,9 @@ while running:
                 if key_pressed and not game_state.game_over:
                     game_state.place_random_tile()
                     game_state.game_over = game_state.is_game_over()
+                    # Check for game clear (2048 tile) only if a tile has been moved
+                    if any(2048 in row for row in game_state.board):
+                        game_state.game_clear = True
 
     screen.fill(background_color)
 
@@ -134,6 +138,11 @@ while running:
     # スコアを描画
     score_text = game_font.render("Score: " + str(game_state.score), True, (0, 0, 0))
     screen.blit(score_text, (10, 450))
+
+    # ゲームクリアメッセージを描画
+    if game_state.game_clear:
+        game_clear_text = game_font.render("Game Clear!", True, (0, 0, 0))
+        screen.blit(game_clear_text, (150, 170))
 
     # ゲームオーバーメッセージを描画
     if game_state.game_over:
