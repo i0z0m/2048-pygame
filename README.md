@@ -1,3 +1,3 @@
 # 2048-pygame
 
-Describe your project here.
+2048 made by pygame co-produced with ChatGPT
