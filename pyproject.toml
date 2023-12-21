@@ -5,7 +5,7 @@ description = "Add a short description here"
 authors = [
     { name = "i0z0m", email = "i0z0mu@gmail.com" }
 ]
-dependencies = ["pygame~=2.4.0"]
+dependencies = ["pygame~=2.4.0", "pygbag~=0.8.5"]
 readme = "README.md"
 requires-python = ">= 3.8"
 
