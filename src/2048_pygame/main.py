@@ -121,9 +121,11 @@ class GameState:
     def is_game_over(self):
         if any(0 in row for row in self.board):
             return False
-        for i in range(3):
-            for j in range(3):
-                if self.board[i][j] == self.board[i+1][j] or self.board[i][j] == self.board[i][j+1]:
+        for i in range(4):
+            for j in range(4):
+                if i < 3 and self.board[i][j] == self.board[i+1][j]:
+                    return False
+                if j < 3 and self.board[i][j] == self.board[i][j+1]:
                     return False
         return True
 
