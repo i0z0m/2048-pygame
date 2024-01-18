@@ -62,27 +62,41 @@ class GameState:
                     if k > 0 and new_board[i][k - 1] == self.board[i][j]:
                         new_board[i][k - 1] *= 2
                         self.score += new_board[i][k - 1]
-                        if direction == 'up':
-                            if self.board[i][j] != 0: self.move_tile((i, j), (i, k - 1)) # 合体するタイルの移動
-                        elif direction == 'down':
-                            if self.board[i][3 - j] != 0: self.move_tile((i, 3 - j), (i, 3 - k)) # 合体するタイルの移動
-                        elif direction == 'left':
-                            if self.board[j][i] != 0: self.move_tile((j, i), (k - 1, i)) # 合体するタイルの移動
-                        elif direction == 'right':
-                            if self.board[3 - j][i] != 0: self.move_tile((3 - j, i), (3 - k, i)) # 合体するタイルの移動
+                        self.move_tile_with_merge(i, j, k, direction)
                     else:
                         new_board[i][k] = self.board[i][j]
-                        if direction == 'up':
-                            if self.board[i][j] != 0: self.move_tile((i, j), (i, k)) # 合体しないタイルの移動
-                        elif direction == 'down':
-                            if self.board[i][3 - j] != 0: self.move_tile((i, 3 - j), (i, 3 - k)) # 合体しないタイルの移動
-                        elif direction == 'left':
-                            if self.board[j][i] != 0: self.move_tile((j, i), (k, i)) # 合体しないタイルの移動
-                        elif direction == 'right':
-                            if self.board[3 - j][i] != 0: self.move_tile((3 - j, i), (3 - k, i)) # 合体しないタイルの移動
+                        self.move_tile_without_merge(i, j, k, direction)
                         k += 1
                 j += 1
         self.board = new_board
+
+    def move_tile_with_merge(self, i, j, k, direction):
+        if direction == 'up':
+            if self.board[i][j] != 0:
+                self.move_tile((i, j), (i, k - 1))
+        elif direction == 'down':
+            if self.board[i][3 - j] != 0:
+                self.move_tile((i, 3 - j), (i, 3 - k))
+        elif direction == 'left':
+            if self.board[j][i] != 0:
+                self.move_tile((j, i), (k - 1, i))
+        elif direction == 'right':
+            if self.board[3 - j][i] != 0:
+                self.move_tile((3 - j, i), (3 - k, i))
+
+    def move_tile_without_merge(self, i, j, k, direction):
+        if direction == 'up':
+            if self.board[i][j] != 0:
+                self.move_tile((i, j), (i, k))
+        elif direction == 'down':
+            if self.board[i][3 - j] != 0:
+                self.move_tile((i, 3 - j), (i, 3 - k))
+        elif direction == 'left':
+            if self.board[j][i] != 0:
+                self.move_tile((j, i), (k, i))
+        elif direction == 'right':
+            if self.board[3 - j][i] != 0:
+                self.move_tile((3 - j, i), (3 - k, i))
 
     def move_up(self):
         self.board = list(map(list, zip(*self.board))) # 90度反時計回りに回転
