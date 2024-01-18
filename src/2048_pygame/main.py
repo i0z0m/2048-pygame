@@ -170,13 +170,18 @@ while running:
     if animation_time > total_animation_time:
         animation_time = 0
         game_state.moving_tiles.clear()
+
+    def ease_out_quad(x):
+        return 1 - (1 - x) * (1 - x)
+
     # アニメーション中のタイルを描画
     for value, start_pos, end_pos in game_state.moving_tiles:
         # Calculate current position based on animation progress
         progress = min(1, animation_time / total_animation_time)
+        eased_progress = ease_out_quad(progress)
         current_pos = (
-            start_pos[0] * (1 - progress) + end_pos[0] * progress,
-            start_pos[1] * (1 - progress) + end_pos[1] * progress
+            start_pos[0] * (1 - eased_progress) + end_pos[0] * eased_progress,
+            start_pos[1] * (1 - eased_progress) + end_pos[1] * eased_progress
         )
 
         # Draw the tile
