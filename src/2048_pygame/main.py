@@ -129,9 +129,17 @@ game_state = GameState()
 game_state.place_random_tile()
 game_state.place_random_tile()
 
+def update_game_state(game_state):
+    if not game_state.game_over:
+        game_state.place_random_tile()
+        game_state.game_over = game_state.is_game_over()
+        # Check for game clear (2048 tile) only if a tile has been moved
+        if any(2048 in row for row in game_state.board):
+            game_state.game_clear = True
+
+touch_start_pos = None
 # ゲームループ
 running = True
-touch_start_pos = None
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -153,6 +161,7 @@ while running:
                         game_state.move_tiles('down')
                     else:
                         game_state.move_tiles('up')
+                update_game_state(game_state)
         elif event.type == pygame.KEYDOWN:
             if not game_state.game_clear and not game_state.game_over:
                 key_pressed = False
@@ -169,12 +178,8 @@ while running:
                     game_state.move_tiles('right')
                     key_pressed = True
 
-                if key_pressed and not game_state.game_over:
-                    game_state.place_random_tile()
-                    game_state.game_over = game_state.is_game_over()
-                    # Check for game clear (2048 tile) only if a tile has been moved
-                    if any(2048 in row for row in game_state.board):
-                        game_state.game_clear = True
+                if key_pressed:
+                    update_game_state(game_state)
 
     screen.fill(background_color)
 
