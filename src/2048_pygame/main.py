@@ -129,12 +129,30 @@ game_state = GameState()
 game_state.place_random_tile()
 game_state.place_random_tile()
 
+start_pos = None
 # ゲームループ
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        elif event.type == pygame.FINGERDOWN:
+            start_pos = event.x, event.y
+        elif event.type == pygame.FINGERUP:
+            if start_pos is not None:
+                end_pos = event.x, event.y
+                dx = end_pos[0] - start_pos[0]
+                dy = end_pos[1] - start_pos[1]
+                if abs(dx) > abs(dy):
+                    if dx > 0:
+                        game_state.move_tiles('right')
+                    else:
+                        game_state.move_tiles('left')
+                else:
+                    if dy > 0:
+                        game_state.move_tiles('down')
+                    else:
+                        game_state.move_tiles('up')
         elif event.type == pygame.KEYDOWN:
             if not game_state.game_clear and not game_state.game_over:
                 key_pressed = False
