@@ -8,10 +8,6 @@ game_font = pygame.font.Font(None, 40)
 tile_font = pygame.font.Font(None, 60)
 screen = pygame.display.set_mode((size, size))
 pygame.display.set_caption("2048")
-clock = pygame.time.Clock()
-total_animation_time = 300
-animation_time = 0
-
 
 # 色の定義
 background_color = (187, 173, 160)
@@ -31,8 +27,6 @@ tile_colors = {
 }
 
 # ゲームの状態を表すクラス
-
-
 class GameState:
     def __init__(self):
         self.board = [[0] * 4 for _ in range(4)]
@@ -138,12 +132,11 @@ def update_game_state(game_state):
             game_state.game_clear = True
 
 touch_start_pos = None
-# ゲームループ
-running = True
-while running:
+def handle_events(game_state):
+    touch_start_pos = None
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            running = False
+            return False
         elif event.type == pygame.FINGERDOWN:
             touch_start_pos = event.x, event.y
         elif event.type == pygame.FINGERUP:
@@ -180,7 +173,9 @@ while running:
 
                 if key_pressed:
                     update_game_state(game_state)
+    return True
 
+def draw_game(game_state, screen, game_font):
     screen.fill(background_color)
 
     # タイルを描画
@@ -195,9 +190,12 @@ while running:
                 screen.blit(text_surface, text_rect)
 
     # フレームレートを制御（ここでは60FPSに設定）
+    clock = pygame.time.Clock()
     clock.tick(60)
     # 経過時間を取得（ミリ秒単位）
     elapsed_time = clock.get_time()
+    animation_time = 0
+    total_animation_time = 300
 
     animation_time += elapsed_time  # Use elapsed_time here
     # アニメーションが終了したらリセット
@@ -239,6 +237,11 @@ while running:
         score_text = game_font.render(f"Score: {game_state.score}", True, (0, 0, 0))
         screen.blit(score_text, (170, 270))  # Adjust the position as needed
 
+# ゲームループ
+running = True
+while running:
+    running = handle_events(game_state)
+    draw_game(game_state, screen, game_font)
     pygame.display.flip()
 
 # ゲーム終了
