@@ -49,10 +49,16 @@ class GameState:
 
     def move_tile(self, start_pos, end_pos):
         tile_value = self.board[start_pos[0]][start_pos[1]]
-        self.board[start_pos[0]][start_pos[1]] = 0
         self.moving_tiles.append((tile_value, start_pos, end_pos))
 
     def move_tiles(self, direction):
+        if direction == 'up':
+            self.board = list(map(list, zip(*self.board))) # 90度反時計回りに回転
+        elif direction == 'down':
+            self.board = list(map(list, zip(*self.board[::-1]))) # 90度時計回りに回転
+        elif direction == 'right':
+            self.board = [row[::-1] for row in self.board] # 左右反転
+
         new_board = [[0] * 4 for _ in range(4)]
         for i in range(4):
             j = 0
@@ -62,13 +68,22 @@ class GameState:
                     if k > 0 and new_board[i][k - 1] == self.board[i][j]:
                         new_board[i][k - 1] *= 2
                         self.score += new_board[i][k - 1]
-                        self.move_tile_with_merge(i, j, k, direction)
+                        # self.move_tile_with_merge(i, j, k, direction)
                     else:
                         new_board[i][k] = self.board[i][j]
-                        self.move_tile_without_merge(i, j, k, direction)
+                        # self.move_tile_without_merge(i, j, k, direction)
                         k += 1
                 j += 1
         self.board = new_board
+
+        if direction == 'up':
+            self.board = list(map(list, zip(*self.board[::-1]))) # 90度時計回りに回転
+            self.board = [row[::-1] for row in self.board] # 左右反転を解除
+        elif direction == 'down':
+            self.board = list(map(list, zip(*self.board))) # 90度反時計回りに回転
+            self.board = self.board[::-1] # 上下反転を解除
+        elif direction == 'right':
+            self.board = [row[::-1] for row in self.board] # 左右反転を解除
 
     def move_tile_with_merge(self, i, j, k, direction):
         if direction == 'up':
@@ -98,26 +113,6 @@ class GameState:
             if self.board[3 - j][i] != 0:
                 self.move_tile((3 - j, i), (3 - k, i))
 
-    def move_up(self):
-        self.board = list(map(list, zip(*self.board))) # 90度反時計回りに回転
-        self.move_tiles('up')
-        self.board = list(map(list, zip(*self.board[::-1]))) # 90度時計回りに回転
-        self.board = [row[::-1] for row in self.board] # 左右反転を解除
-
-    def move_down(self):
-        self.board = list(map(list, zip(*self.board[::-1]))) # 90度時計回りに回転
-        self.move_tiles('down')
-        self.board = list(map(list, zip(*self.board))) # 90度反時計回りに回転
-        self.board = self.board[::-1] # 上下反転を解除
-
-    def move_left(self):
-        self.move_tiles('left')
-
-    def move_right(self):
-        self.board = [row[::-1] for row in self.board] # 左右反転
-        self.move_tiles('right')
-        self.board = [row[::-1] for row in self.board] # 左右反転を解除
-
     def is_game_over(self):
         if any(0 in row for row in self.board):
             return False
@@ -144,16 +139,16 @@ while running:
             if not game_state.game_clear and not game_state.game_over:
                 key_pressed = False
                 if event.key == pygame.K_UP:
-                    game_state.move_up()
+                    game_state.move_tiles('up')
                     key_pressed = True
                 elif event.key == pygame.K_DOWN:
-                    game_state.move_down()
+                    game_state.move_tiles('down')
                     key_pressed = True
                 elif event.key == pygame.K_LEFT:
-                    game_state.move_left()
+                    game_state.move_tiles('left')
                     key_pressed = True
                 elif event.key == pygame.K_RIGHT:
-                    game_state.move_right()
+                    game_state.move_tiles('right')
                     key_pressed = True
 
                 if key_pressed and not game_state.game_over:
