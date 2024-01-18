@@ -36,7 +36,7 @@ tile_colors = {
 class GameState:
     def __init__(self):
         self.board = [[0] * 4 for _ in range(4)]
-        self.moving_tiles = []  # List of tuples (tile_value, start_pos, end_pos)
+        self.moving_tiles = []
         self.score = 0
         self.game_over = False
         self.game_clear = False
@@ -47,9 +47,9 @@ class GameState:
             row, col = random.choice(empty_tiles)
             self.board[row][col] = random.choice([2, 4])
 
-    def move_tile(self, start_pos, end_pos):
-        tile_value = self.board[start_pos[0]][start_pos[1]]
-        self.moving_tiles.append((tile_value, start_pos, end_pos))
+    def move_tile(self, move_start_pos, move_end_pos):
+        tile_value = self.board[move_start_pos[0]][move_start_pos[1]]
+        self.moving_tiles.append((tile_value, move_start_pos, move_end_pos))
 
     def move_tiles(self, direction):
         if direction == 'up':
@@ -129,20 +129,20 @@ game_state = GameState()
 game_state.place_random_tile()
 game_state.place_random_tile()
 
-start_pos = None
 # ゲームループ
 running = True
+touch_start_pos = None
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.FINGERDOWN:
-            start_pos = event.x, event.y
+            touch_start_pos = event.x, event.y
         elif event.type == pygame.FINGERUP:
-            if start_pos is not None:
-                end_pos = event.x, event.y
-                dx = end_pos[0] - start_pos[0]
-                dy = end_pos[1] - start_pos[1]
+            if touch_start_pos is not None:
+                touch_end_pos = event.x, event.y
+                dx = touch_end_pos[0] - touch_start_pos[0]
+                dy = touch_end_pos[1] - touch_start_pos[1]
                 if abs(dx) > abs(dy):
                     if dx > 0:
                         game_state.move_tiles('right')
@@ -204,13 +204,13 @@ while running:
         return 1 - (1 - x) * (1 - x)
 
     # アニメーション中のタイルを描画
-    for value, start_pos, end_pos in game_state.moving_tiles:
+    for value, move_start_pos, move_end_pos in game_state.moving_tiles:
         # Calculate current position based on animation progress
         progress = min(1, animation_time / total_animation_time)
         eased_progress = ease_out_quad(progress)
         current_pos = (
-            start_pos[0] * (1 - eased_progress) + end_pos[0] * eased_progress,
-            start_pos[1] * (1 - eased_progress) + end_pos[1] * eased_progress
+            move_start_pos[0] * (1 - eased_progress) + move_end_pos[0] * eased_progress,
+            move_start_pos[1] * (1 - eased_progress) + move_end_pos[1] * eased_progress
         )
 
         # Draw the tile
