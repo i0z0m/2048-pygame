@@ -132,11 +132,10 @@ def update_game_state(game_state):
             game_state.game_clear = True
 
 touch_start_pos = None
-def handle_events(game_state):
-    touch_start_pos = None
+def handle_events(game_state, touch_start_pos):
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            return False
+            return False, touch_start_pos
         elif event.type == pygame.FINGERDOWN:
             touch_start_pos = event.x, event.y
         elif event.type == pygame.FINGERUP:
@@ -173,7 +172,7 @@ def handle_events(game_state):
 
                 if key_pressed:
                     update_game_state(game_state)
-    return True
+    return True, touch_start_pos
 
 def draw_game(game_state, screen, game_font):
     screen.fill(background_color)
@@ -240,7 +239,7 @@ def draw_game(game_state, screen, game_font):
 # ゲームループ
 running = True
 while running:
-    running = handle_events(game_state)
+    running, touch_start_pos = handle_events(game_state, touch_start_pos)
     draw_game(game_state, screen, game_font)
     pygame.display.flip()
 
