@@ -30,7 +30,6 @@ tile_colors = {
 class GameState:
     def __init__(self):
         self.board = [[0] * 4 for _ in range(4)]
-        self.moving_tiles = []
         self.score = 0
         self.game_over = False
         self.game_clear = False
