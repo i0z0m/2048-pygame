@@ -41,10 +41,6 @@ class GameState:
             row, col = random.choice(empty_tiles)
             self.board[row][col] = random.choice([2, 4])
 
-    def move_tile(self, move_start_pos, move_end_pos):
-        tile_value = self.board[move_start_pos[0]][move_start_pos[1]]
-        self.moving_tiles.append((tile_value, move_start_pos, move_end_pos))
-
     def move_tiles(self, direction):
         if direction == 'up':
             self.board = list(map(list, zip(*self.board))) # 90度反時計回りに回転
@@ -62,10 +58,8 @@ class GameState:
                     if k > 0 and new_board[i][k - 1] == self.board[i][j]:
                         new_board[i][k - 1] *= 2
                         self.score += new_board[i][k - 1]
-                        # self.move_tile_with_merge(i, j, k, direction)
                     else:
                         new_board[i][k] = self.board[i][j]
-                        # self.move_tile_without_merge(i, j, k, direction)
                         k += 1
                 j += 1
         self.board = new_board
@@ -78,34 +72,6 @@ class GameState:
             self.board = self.board[::-1] # 上下反転を解除
         elif direction == 'right':
             self.board = [row[::-1] for row in self.board] # 左右反転を解除
-
-    def move_tile_with_merge(self, i, j, k, direction):
-        if direction == 'up':
-            if self.board[i][j] != 0:
-                self.move_tile((i, j), (i, k - 1))
-        elif direction == 'down':
-            if self.board[i][3 - j] != 0:
-                self.move_tile((i, 3 - j), (i, 3 - k))
-        elif direction == 'left':
-            if self.board[j][i] != 0:
-                self.move_tile((j, i), (k - 1, i))
-        elif direction == 'right':
-            if self.board[3 - j][i] != 0:
-                self.move_tile((3 - j, i), (3 - k, i))
-
-    def move_tile_without_merge(self, i, j, k, direction):
-        if direction == 'up':
-            if self.board[i][j] != 0:
-                self.move_tile((i, j), (i, k))
-        elif direction == 'down':
-            if self.board[i][3 - j] != 0:
-                self.move_tile((i, 3 - j), (i, 3 - k))
-        elif direction == 'left':
-            if self.board[j][i] != 0:
-                self.move_tile((j, i), (k, i))
-        elif direction == 'right':
-            if self.board[3 - j][i] != 0:
-                self.move_tile((3 - j, i), (3 - k, i))
 
     def is_game_over(self):
         if any(0 in row for row in self.board):
@@ -187,40 +153,6 @@ def draw_game(game_state, screen, game_font):
                 text_surface = tile_font.render(str(value), True, (0, 0, 0))
                 text_rect = text_surface.get_rect(center=(j * 125 + 65, i * 125 + 65))
                 screen.blit(text_surface, text_rect)
-
-    # フレームレートを制御（ここでは60FPSに設定）
-    clock = pygame.time.Clock()
-    clock.tick(60)
-    # 経過時間を取得（ミリ秒単位）
-    elapsed_time = clock.get_time()
-    animation_time = 0
-    total_animation_time = 300
-
-    animation_time += elapsed_time  # Use elapsed_time here
-    # アニメーションが終了したらリセット
-    if animation_time > total_animation_time:
-        animation_time = 0
-        game_state.moving_tiles.clear()
-
-    def ease_out_quad(x):
-        return 1 - (1 - x) * (1 - x)
-
-    # アニメーション中のタイルを描画
-    for value, move_start_pos, move_end_pos in game_state.moving_tiles:
-        # Calculate current position based on animation progress
-        progress = min(1, animation_time / total_animation_time)
-        eased_progress = ease_out_quad(progress)
-        current_pos = (
-            move_start_pos[0] * (1 - eased_progress) + move_end_pos[0] * eased_progress,
-            move_start_pos[1] * (1 - eased_progress) + move_end_pos[1] * eased_progress
-        )
-
-        # Draw the tile
-        color = tile_colors[value]
-        pygame.draw.rect(screen, color, (current_pos[0] * 125 + 10, current_pos[1] * 125 + 10, 115, 115))
-        text_surface = tile_font.render(str(value), True, (0, 0, 0))
-        text_rect = text_surface.get_rect(center=(current_pos[0] * 125 + 65, current_pos[1] * 125 + 65))
-        screen.blit(text_surface, text_rect)
 
     # ゲームクリアメッセージを描画
     if game_state.game_clear:
