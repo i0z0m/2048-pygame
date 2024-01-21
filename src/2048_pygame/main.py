@@ -31,8 +31,10 @@ tile_colors = {
 class GameState:
     def __init__(self):
         self.board = [[0] * 4 for _ in range(4)]
+        self.previous_board = copy.deepcopy(self.board)
         self.score = 0
         self.moving_tiles = []
+        self.is_animating = False
         self.game_over = False
         self.game_clear = False
 
@@ -43,6 +45,8 @@ class GameState:
             self.board[row][col] = random.choice([2, 4])
 
     def move_tile(self, move_start_pos, move_end_pos):
+        self.is_animating = True
+        self.previous_board = copy.deepcopy(self.board)
         tile_value = self.board[move_start_pos[0]][move_start_pos[1]]
         self.moving_tiles.append((tile_value, move_start_pos, move_end_pos))
 
@@ -181,20 +185,13 @@ total_animation_time = 300
 def draw_game(game_state, screen, game_font, animation_time):
     screen.fill(background_color)
 
-    # Before starting the animation, save the current state of the board
-    previous_board = copy.deepcopy(game_state.board)
-
-    # Perform the move operation and save the new state of the board
-    update_game_state(game_state)
-    new_board = copy.deepcopy(game_state.board)
-
-    # Reset the game state's board to the previous state for the animation
-    game_state.board = previous_board
-
     # タイルを描画
     for i in range(4):
         for j in range(4):
-            value = game_state.board[i][j]
+            if game_state.is_animating:
+                value = game_state.previous_board[i][j]
+            else:
+                value = game_state.board[i][j]
             color = tile_colors[value]
             pygame.draw.rect(screen, color, (j * 125 + 10, i * 125 + 10, 115, 115))
             if value != 0:
@@ -239,17 +236,20 @@ def draw_game(game_state, screen, game_font, animation_time):
         score_text = game_font.render(f"Score: {game_state.score}", True, (87, 79, 74))
         screen.blit(score_text, (170, 270))  # Adjust the position as needed
 
-# ゲームループ
 running = True
 while running:
-    running, touch_start_pos = handle_events(game_state, touch_start_pos)
+    # Skip handling events if an animation is in progress
+    if not game_state.is_animating:
+        running, touch_start_pos = handle_events(game_state, touch_start_pos)
 
     # Update the animation time
     elapsed_time = clock.tick(60)  # Limit the frame rate to 60 FPS
     animation_time += elapsed_time
     if animation_time > total_animation_time:  # Reset the animation time after 300 ms
         animation_time = 0
+        game_state.is_animating = False
         game_state.moving_tiles.clear()
+
     draw_game(game_state, screen, game_font, animation_time)
 
     pygame.display.flip()
