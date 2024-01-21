@@ -182,30 +182,32 @@ def handle_events(game_state, touch_start_pos):
 clock = pygame.time.Clock()
 animation_time = 0
 total_animation_time = 300
+
+def draw_tile(value, pos, screen, tile_font):
+    color = tile_colors[value]
+    pygame.draw.rect(screen, color, (pos[1] * 125 + 10, pos[0] * 125 + 10, 115, 115))
+    if value != 0:
+        text_color = (87, 79, 74) if value < 8 else (255, 255, 255)
+        text_surface = tile_font.render(str(value), True, text_color)
+        text_rect = text_surface.get_rect(center=(pos[1] * 125 + 65, pos[0] * 125 + 65))
+        screen.blit(text_surface, text_rect)
+
 def draw_game(game_state, screen, game_font, animation_time):
     screen.fill(background_color)
 
     # タイルを描画
     for i in range(4):
         for j in range(4):
-            if game_state.is_animating:
-                value = game_state.previous_board[i][j]
-            else:
-                value = game_state.board[i][j]
-            color = tile_colors[value]
-            pygame.draw.rect(screen, color, (j * 125 + 10, i * 125 + 10, 115, 115))
-            if value != 0:
-                # Change text color based on tile value
-                text_color = (87, 79, 74) if value < 8 else (255, 255, 255)
-                text_surface = tile_font.render(str(value), True, text_color)
-                text_rect = text_surface.get_rect(center=(j * 125 + 65, i * 125 + 65))
-                screen.blit(text_surface, text_rect)
+            value = game_state.board[i][j]
+            draw_tile(value, (i, j), screen, tile_font)
 
     def ease_out_quad(x):
         return 1 - (1 - x) * (1 - x)
 
     # アニメーション中のタイルを描画
     for value, move_start_pos, move_end_pos in game_state.moving_tiles:
+        value = game_state.previous_board[move_start_pos[0]][move_start_pos[1]]
+
         # Calculate current position based on animation progress
         progress = min(1, animation_time / total_animation_time)
         eased_progress = ease_out_quad(progress)
@@ -213,14 +215,7 @@ def draw_game(game_state, screen, game_font, animation_time):
             move_start_pos[0] * (1 - eased_progress) + move_end_pos[0] * eased_progress,
             move_start_pos[1] * (1 - eased_progress) + move_end_pos[1] * eased_progress
         )
-
-        # Draw the tile
-        color = tile_colors[value]
-        text_color = (87, 79, 74) if value in [2, 4] else (255, 255, 255)  # Set text color based on tile value
-        pygame.draw.rect(screen, color, (current_pos[0] * 125 + 10, current_pos[1] * 125 + 10, 115, 115))
-        text_surface = tile_font.render(str(value), True, text_color)
-        text_rect = text_surface.get_rect(center=(current_pos[0] * 125 + 65, current_pos[1] * 125 + 65))
-        screen.blit(text_surface, text_rect)
+        draw_tile(value, (current_pos[1], current_pos[0]), screen, tile_font)
 
     # ゲームクリアメッセージを描画
     if game_state.game_clear:
