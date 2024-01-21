@@ -86,30 +86,22 @@ class GameState:
 
     def move_tile_with_merge(self, i, j, k, direction):
         if direction == 'up':
-            if self.board[i][j] != 0:
                 self.move_tile((i, j), (i, k - 1))
         elif direction == 'down':
-            if self.board[i][3 - j] != 0:
                 self.move_tile((i, 3 - j), (i, 3 - (k - 1)))
         elif direction == 'left':
-            if self.board[j][i] != 0:
                 self.move_tile((j, i), (k - 1, i))
         elif direction == 'right':
-            if self.board[3 - j][i] != 0:
                 self.move_tile((3 - j, i), (3 - (k - 1), i))
 
     def move_tile_without_merge(self, i, j, k, direction):
         if direction == 'up':
-            if self.board[i][j] != 0:
                 self.move_tile((i, j), (i, k))
         elif direction == 'down':
-            if self.board[i][3 - j] != 0:
                 self.move_tile((i, 3 - j), (i, 3 - k))
         elif direction == 'left':
-            if self.board[j][i] != 0:
                 self.move_tile((j, i), (k, i))
         elif direction == 'right':
-            if self.board[3 - j][i] != 0:
                 self.move_tile((3 - j, i), (3 - k, i))
 
     def is_game_over(self):
