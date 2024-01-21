@@ -53,12 +53,12 @@ class GameState:
     def move_tile(self, i, j, k, direction, is_merge):
         if direction == 'up':
             self.move((i, j), (i, k - 1 if is_merge else k))
-        elif direction == 'down':
-            self.move((i, 3 - j), (i, 3 - (k - 1 if is_merge else k)))
-        elif direction == 'left':
-            self.move((j, i), (k - 1 if is_merge else k, i))
-        elif direction == 'right':
-            self.move((3 - j, i), (3 - (k - 1 if is_merge else k), i))
+        # elif direction == 'down':
+        #     self.move((i, 3 - j), (i, 3 - (k - 1 if is_merge else k)))
+        # elif direction == 'left':
+        #     self.move((j, i), (k - 1 if is_merge else k, i))
+        # elif direction == 'right':
+        #     self.move((3 - j, i), (3 - (k - 1 if is_merge else k), i))
 
     def move_tiles(self, direction):
         if direction == 'up':
