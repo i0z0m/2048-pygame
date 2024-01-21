@@ -1,5 +1,6 @@
 import pygame
 import random
+import copy
 
 # ゲームの初期化
 pygame.init()
@@ -31,6 +32,7 @@ class GameState:
     def __init__(self):
         self.board = [[0] * 4 for _ in range(4)]
         self.score = 0
+        self.moving_tiles = []
         self.game_over = False
         self.game_clear = False
 
@@ -39,6 +41,10 @@ class GameState:
         if empty_tiles:
             row, col = random.choice(empty_tiles)
             self.board[row][col] = random.choice([2, 4])
+
+    def move_tile(self, move_start_pos, move_end_pos):
+        tile_value = self.board[move_start_pos[0]][move_start_pos[1]]
+        self.moving_tiles.append((tile_value, move_start_pos, move_end_pos))
 
     def move_tiles(self, direction):
         if direction == 'up':
@@ -57,8 +63,10 @@ class GameState:
                     if k > 0 and new_board[i][k - 1] == self.board[i][j]:
                         new_board[i][k - 1] *= 2
                         self.score += new_board[i][k - 1]
+                        self.move_tile_with_merge(i, j, k, direction)
                     else:
                         new_board[i][k] = self.board[i][j]
+                        self.move_tile_without_merge(i, j, k, direction)
                         k += 1
                 j += 1
         self.board = new_board
@@ -71,6 +79,34 @@ class GameState:
             self.board = self.board[::-1] # 上下反転を解除
         elif direction == 'right':
             self.board = [row[::-1] for row in self.board] # 左右反転を解除
+
+    def move_tile_with_merge(self, i, j, k, direction):
+        if direction == 'up':
+            if self.board[i][j] != 0:
+                self.move_tile((i, j), (i, k - 1))
+        elif direction == 'down':
+            if self.board[i][3 - j] != 0:
+                self.move_tile((i, 3 - j), (i, 3 - k))
+        elif direction == 'left':
+            if self.board[j][i] != 0:
+                self.move_tile((j, i), (k - 1, i))
+        elif direction == 'right':
+            if self.board[3 - j][i] != 0:
+                self.move_tile((3 - j, i), (3 - k, i))
+
+    def move_tile_without_merge(self, i, j, k, direction):
+        if direction == 'up':
+            if self.board[i][j] != 0:
+                self.move_tile((i, j), (i, k))
+        elif direction == 'down':
+            if self.board[i][3 - j] != 0:
+                self.move_tile((i, 3 - j), (i, 3 - k))
+        elif direction == 'left':
+            if self.board[j][i] != 0:
+                self.move_tile((j, i), (k, i))
+        elif direction == 'right':
+            if self.board[3 - j][i] != 0:
+                self.move_tile((3 - j, i), (3 - k, i))
 
     def is_game_over(self):
         if any(0 in row for row in self.board):
@@ -139,8 +175,21 @@ def handle_events(game_state, touch_start_pos):
                     update_game_state(game_state)
     return True, touch_start_pos
 
-def draw_game(game_state, screen, game_font):
+clock = pygame.time.Clock()
+animation_time = 0
+total_animation_time = 300
+def draw_game(game_state, screen, game_font, animation_time):
     screen.fill(background_color)
+
+    # Before starting the animation, save the current state of the board
+    previous_board = copy.deepcopy(game_state.board)
+
+    # Perform the move operation and save the new state of the board
+    update_game_state(game_state)
+    new_board = copy.deepcopy(game_state.board)
+
+    # Reset the game state's board to the previous state for the animation
+    game_state.board = previous_board
 
     # タイルを描画
     for i in range(4):
@@ -154,6 +203,27 @@ def draw_game(game_state, screen, game_font):
                 text_surface = tile_font.render(str(value), True, text_color)
                 text_rect = text_surface.get_rect(center=(j * 125 + 65, i * 125 + 65))
                 screen.blit(text_surface, text_rect)
+
+    def ease_out_quad(x):
+        return 1 - (1 - x) * (1 - x)
+
+    # アニメーション中のタイルを描画
+    for value, move_start_pos, move_end_pos in game_state.moving_tiles:
+        # Calculate current position based on animation progress
+        progress = min(1, animation_time / total_animation_time)
+        eased_progress = ease_out_quad(progress)
+        current_pos = (
+            move_start_pos[0] * (1 - eased_progress) + move_end_pos[0] * eased_progress,
+            move_start_pos[1] * (1 - eased_progress) + move_end_pos[1] * eased_progress
+        )
+
+        # Draw the tile
+        color = tile_colors[value]
+        text_color = (87, 79, 74) if value in [2, 4] else (255, 255, 255)  # Set text color based on tile value
+        pygame.draw.rect(screen, color, (current_pos[0] * 125 + 10, current_pos[1] * 125 + 10, 115, 115))
+        text_surface = tile_font.render(str(value), True, text_color)
+        text_rect = text_surface.get_rect(center=(current_pos[0] * 125 + 65, current_pos[1] * 125 + 65))
+        screen.blit(text_surface, text_rect)
 
     # ゲームクリアメッセージを描画
     if game_state.game_clear:
@@ -173,7 +243,15 @@ def draw_game(game_state, screen, game_font):
 running = True
 while running:
     running, touch_start_pos = handle_events(game_state, touch_start_pos)
-    draw_game(game_state, screen, game_font)
+
+    # Update the animation time
+    elapsed_time = clock.tick(60)  # Limit the frame rate to 60 FPS
+    animation_time += elapsed_time
+    if animation_time > total_animation_time:  # Reset the animation time after 300 ms
+        animation_time = 0
+        game_state.moving_tiles.clear()
+    draw_game(game_state, screen, game_font, animation_time)
+
     pygame.display.flip()
 
 # ゲーム終了
