@@ -143,22 +143,15 @@ def handle_events(game_state, touch_start_pos):
                 update_game_state(game_state)
         elif event.type == pygame.KEYDOWN:
             if not game_state.game_clear and not game_state.game_over:
-                key_pressed = False
                 if event.key == pygame.K_UP:
                     game_state.move_tiles('up')
-                    key_pressed = True
                 elif event.key == pygame.K_DOWN:
                     game_state.move_tiles('down')
-                    key_pressed = True
                 elif event.key == pygame.K_LEFT:
                     game_state.move_tiles('left')
-                    key_pressed = True
                 elif event.key == pygame.K_RIGHT:
                     game_state.move_tiles('right')
-                    key_pressed = True
-
-                if key_pressed:
-                    update_game_state(game_state)
+                update_game_state(game_state)
     return True, touch_start_pos
 
 clock = pygame.time.Clock()
