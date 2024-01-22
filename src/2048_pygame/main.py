@@ -209,16 +209,16 @@ def draw_game(game_state, screen, game_font, animation_time):
     # ゲームクリアメッセージを描画
     if game_state.game_clear:
         game_clear_text = game_font.render("Game Clear!", True, (237, 194, 46))
-        screen.blit(game_clear_text, (170, 240))
+        screen.blit(game_clear_text, (size / 3 - 15, size / 2 - 30))
         score_text = game_font.render(f"Score: {game_state.score}", True, (87, 79, 74))
-        screen.blit(score_text, (170, 270))  # Adjust the position as needed
+        screen.blit(score_text, (size / 3 - 15, size / 2))
 
     # ゲームオーバーメッセージを描画
     if game_state.game_over:
         game_over_text = game_font.render("Game Over", True, (255, 255, 255))
-        screen.blit(game_over_text, (170, 240))
+        screen.blit(game_over_text, (size / 3 - 15, size / 2 - 30))
         score_text = game_font.render(f"Score: {game_state.score}", True, (87, 79, 74))
-        screen.blit(score_text, (170, 270))  # Adjust the position as needed
+        screen.blit(score_text, (size / 3 - 15, size / 2))
 
 running = True
 while running:
