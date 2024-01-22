@@ -5,8 +5,9 @@ import copy
 # ゲームの初期化
 pygame.init()
 BOARD_SIZE = 4
+PANEL_SIZE = 100
 LAST_INDEX = BOARD_SIZE - 1
-size = BOARD_SIZE * 125 + 10
+size = BOARD_SIZE * PANEL_SIZE + 10
 game_font = pygame.font.Font(None, 40)
 tile_font = pygame.font.Font(None, 60)
 screen = pygame.display.set_mode((size, size))
@@ -173,11 +174,11 @@ total_animation_time = 300
 
 def draw_tile(value, pos, screen, tile_font):
     color = tile_colors[value]
-    pygame.draw.rect(screen, color, (pos[1] * 125 + 10, pos[0] * 125 + 10, 115, 115))
+    pygame.draw.rect(screen, color, (pos[1] * PANEL_SIZE + 10, pos[0] * PANEL_SIZE + 10, PANEL_SIZE - 10, PANEL_SIZE - 10))
     if value != 0:
         text_color = (87, 79, 74) if value < 8 else (255, 255, 255)
         text_surface = tile_font.render(str(value), True, text_color)
-        text_rect = text_surface.get_rect(center=(pos[1] * 125 + 65, pos[0] * 125 + 65))
+        text_rect = text_surface.get_rect(center=(pos[1] * PANEL_SIZE + PANEL_SIZE / 2, pos[0] * PANEL_SIZE + PANEL_SIZE / 2))
         screen.blit(text_surface, text_rect)
 
 def draw_game(game_state, screen, game_font, animation_time):
