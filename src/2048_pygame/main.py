@@ -54,25 +54,22 @@ class GameState:
         self.moving_tiles.append((tile_value, start_pos, end_pos))
 
     def move_tile(self, current_row, source_column, target_column, direction):
-        start_pos = end_pos = None
-
         if direction == 'up':
             start_pos = (current_row, source_column)
             end_pos = (current_row, target_column)
-        elif direction == 'down':
-            start_pos = (LAST_INDEX - current_row, LAST_INDEX - source_column)
-            end_pos = (LAST_INDEX - current_row, LAST_INDEX - target_column)
-        elif direction == 'left':
-            start_pos = (source_column, current_row)
-            end_pos = (target_column, current_row)
-        elif direction == 'right':
-            start_pos = (LAST_INDEX - source_column, LAST_INDEX - current_row)
-            end_pos = (LAST_INDEX - target_column, LAST_INDEX - current_row)
-
-        if start_pos is not None and end_pos is not None:
             self.move(start_pos, end_pos)
-        else:
-            raise ValueError(f"Invalid direction: {direction}")
+        # elif direction == 'down':
+        #     start_pos = (LAST_INDEX - current_row, LAST_INDEX - source_column)
+        #     end_pos = (LAST_INDEX - current_row, LAST_INDEX - target_column)
+        #     self.move(start_pos, end_pos)
+        # elif direction == 'left':
+        #     start_pos = (source_column, current_row)
+        #     end_pos = (target_column, current_row)
+        #     self.move(start_pos, end_pos)
+        # elif direction == 'right':
+        #     start_pos = (LAST_INDEX - source_column, LAST_INDEX - current_row)
+        #     end_pos = (LAST_INDEX - target_column, LAST_INDEX - current_row)
+        #     self.move(start_pos, end_pos)
 
     def move_tiles(self, direction):
         if direction == 'up':
