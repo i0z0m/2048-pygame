@@ -4,9 +4,9 @@ import copy
 
 # ゲームの初期化
 pygame.init()
-size = 510
 BOARD_SIZE = 4
 LAST_INDEX = BOARD_SIZE - 1
+size = BOARD_SIZE * 125 + 10
 game_font = pygame.font.Font(None, 40)
 tile_font = pygame.font.Font(None, 60)
 screen = pygame.display.set_mode((size, size))
