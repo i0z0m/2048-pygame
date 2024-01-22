@@ -44,21 +44,32 @@ class GameState:
             row, col = random.choice(empty_tiles)
             self.board[row][col] = random.choice([2, 4])
 
-    def move(self, move_start_pos, move_end_pos):
+    def move(self, start_pos, end_pos):
         self.is_animating = True
         self.previous_board = copy.deepcopy(self.board)
-        tile_value = self.board[move_start_pos[0]][move_start_pos[1]]
-        self.moving_tiles.append((tile_value, move_start_pos, move_end_pos))
+        tile_value = self.board[start_pos[0]][start_pos[1]]
+        self.moving_tiles.append((tile_value, start_pos, end_pos))
 
-    def move_tile(self, i, j, k, direction, is_merge):
+    def move_tile(self, i, j, k, direction):
+        start_pos = end_pos = None
+
         if direction == 'up':
-            self.move((i, j), (i, k - 1 if is_merge else k))
+            start_pos = (i, j)
+            end_pos = (i, k)
         # elif direction == 'down':
-        #     self.move((i, 3 - j), (i, 3 - (k - 1 if is_merge else k)))
+        #     start_pos = (3 - i, 3 - j)
+        #     end_pos = (3 - i, 3 - k)
         # elif direction == 'left':
-        #     self.move((j, i), (k - 1 if is_merge else k, i))
+        #     start_pos = (j, i)
+        #     end_pos = (k, i)
         # elif direction == 'right':
-        #     self.move((3 - j, i), (3 - (k - 1 if is_merge else k), i))
+        #     start_pos = (3 - j, 3 - i)
+        #     end_pos = (3 - k, 3 - i)
+
+        if start_pos is not None and end_pos is not None:
+            self.move(start_pos, end_pos)
+        else:
+            raise ValueError(f"Invalid direction: {direction}")
 
     def move_tiles(self, direction):
         if direction == 'up':
@@ -77,10 +88,10 @@ class GameState:
                     if k > 0 and new_board[i][k - 1] == self.board[i][j]:
                         new_board[i][k - 1] *= 2
                         self.score += new_board[i][k - 1]
-                        self.move_tile(i, j, k, direction, is_merge=True)
+                        self.move_tile(i, j, k - 1, direction)
                     else:
                         new_board[i][k] = self.board[i][j]
-                        self.move_tile(i, j, k, direction, is_merge=False)
+                        self.move_tile(i, j, k, direction)
                         k += 1
                 j += 1
         self.board = new_board
