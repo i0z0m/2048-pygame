@@ -50,21 +50,21 @@ class GameState:
         tile_value = self.board[start_pos[0]][start_pos[1]]
         self.moving_tiles.append((tile_value, start_pos, end_pos))
 
-    def move_tile(self, i, j, k, direction):
+    def move_tile(self, current_row, source_column, target_column, direction):
         start_pos = end_pos = None
 
         if direction == 'up':
-            start_pos = (i, j)
-            end_pos = (i, k)
-        # elif direction == 'down':
-        #     start_pos = (3 - i, 3 - j)
-        #     end_pos = (3 - i, 3 - k)
-        # elif direction == 'left':
-        #     start_pos = (j, i)
-        #     end_pos = (k, i)
-        # elif direction == 'right':
-        #     start_pos = (3 - j, 3 - i)
-        #     end_pos = (3 - k, 3 - i)
+            start_pos = (current_row, source_column)
+            end_pos = (current_row, target_column)
+        elif direction == 'down':
+            start_pos = (3 - current_row, 3 - source_column)
+            end_pos = (3 - current_row, 3 - target_column)
+        elif direction == 'left':
+            start_pos = (source_column, current_row)
+            end_pos = (target_column, current_row)
+        elif direction == 'right':
+            start_pos = (3 - source_column, 3 - current_row)
+            end_pos = (3 - target_column, 3 - current_row)
 
         if start_pos is not None and end_pos is not None:
             self.move(start_pos, end_pos)
@@ -80,20 +80,20 @@ class GameState:
             self.board = [row[::-1] for row in self.board] # 左右反転
 
         new_board = [[0] * 4 for _ in range(4)]
-        for i in range(4):
-            j = 0
-            k = 0
-            while j < 4:
-                if self.board[i][j] != 0:
-                    if k > 0 and new_board[i][k - 1] == self.board[i][j]:
-                        new_board[i][k - 1] *= 2
-                        self.score += new_board[i][k - 1]
-                        self.move_tile(i, j, k - 1, direction)
+        for current_row in range(4):
+            source_column = 0
+            target_column = 0
+            while source_column < 4:
+                if self.board[current_row][source_column] != 0:
+                    if target_column > 0 and new_board[current_row][target_column - 1] == self.board[current_row][source_column]:
+                        new_board[current_row][target_column - 1] *= 2
+                        self.score += new_board[current_row][target_column - 1]
+                        self.move_tile(current_row, source_column, target_column - 1, direction)
                     else:
-                        new_board[i][k] = self.board[i][j]
-                        self.move_tile(i, j, k, direction)
-                        k += 1
-                j += 1
+                        new_board[current_row][target_column] = self.board[current_row][source_column]
+                        self.move_tile(current_row, source_column, target_column, direction)
+                        target_column += 1
+                source_column += 1
         self.board = new_board
 
         if direction == 'up':
