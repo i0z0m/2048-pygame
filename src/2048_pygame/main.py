@@ -5,6 +5,8 @@ import copy
 # ゲームの初期化
 pygame.init()
 size = 510
+BOARD_SIZE = 4
+LAST_INDEX = BOARD_SIZE - 1
 game_font = pygame.font.Font(None, 40)
 tile_font = pygame.font.Font(None, 60)
 screen = pygame.display.set_mode((size, size))
@@ -30,7 +32,7 @@ tile_colors = {
 # ゲームの状態を表すクラス
 class GameState:
     def __init__(self):
-        self.board = [[0] * 4 for _ in range(4)]
+        self.board = [[0] * BOARD_SIZE for _ in range(BOARD_SIZE)]
         self.previous_board = copy.deepcopy(self.board)
         self.score = 0
         self.moving_tiles = []
@@ -39,7 +41,7 @@ class GameState:
         self.game_clear = False
 
     def place_random_tile(self):
-        empty_tiles = [(i, j) for i in range(4) for j in range(4) if self.board[i][j] == 0]
+        empty_tiles = [(i, j) for i in range(BOARD_SIZE) for j in range(BOARD_SIZE) if self.board[i][j] == 0]
         if empty_tiles:
             row, col = random.choice(empty_tiles)
             self.board[row][col] = random.choice([2, 4])
@@ -57,14 +59,14 @@ class GameState:
             start_pos = (current_row, source_column)
             end_pos = (current_row, target_column)
         elif direction == 'down':
-            start_pos = (3 - current_row, 3 - source_column)
-            end_pos = (3 - current_row, 3 - target_column)
+            start_pos = (LAST_INDEX - current_row, LAST_INDEX - source_column)
+            end_pos = (LAST_INDEX - current_row, LAST_INDEX - target_column)
         elif direction == 'left':
             start_pos = (source_column, current_row)
             end_pos = (target_column, current_row)
         elif direction == 'right':
-            start_pos = (3 - source_column, 3 - current_row)
-            end_pos = (3 - target_column, 3 - current_row)
+            start_pos = (LAST_INDEX - source_column, LAST_INDEX - current_row)
+            end_pos = (LAST_INDEX - target_column, LAST_INDEX - current_row)
 
         if start_pos is not None and end_pos is not None:
             self.move(start_pos, end_pos)
@@ -79,11 +81,11 @@ class GameState:
         elif direction == 'right':
             self.board = [row[::-1] for row in self.board] # 左右反転
 
-        new_board = [[0] * 4 for _ in range(4)]
-        for current_row in range(4):
+        new_board = [[0] * BOARD_SIZE for _ in range(BOARD_SIZE)]
+        for current_row in range(BOARD_SIZE):
             source_column = 0
             target_column = 0
-            while source_column < 4:
+            while source_column < BOARD_SIZE:
                 if self.board[current_row][source_column] != 0:
                     if target_column > 0 and new_board[current_row][target_column - 1] == self.board[current_row][source_column]:
                         new_board[current_row][target_column - 1] *= 2
@@ -108,11 +110,11 @@ class GameState:
     def is_game_over(self):
         if any(0 in row for row in self.board):
             return False
-        for i in range(4):
-            for j in range(4):
-                if i < 3 and self.board[i][j] == self.board[i+1][j]:
+        for current_row in range(BOARD_SIZE):
+            for source_column in range(BOARD_SIZE):
+                if current_row < LAST_INDEX and self.board[current_row][source_column] == self.board[current_row+1][source_column]:
                     return False
-                if j < 3 and self.board[i][j] == self.board[i][j+1]:
+                if source_column < LAST_INDEX and self.board[current_row][source_column] == self.board[current_row][source_column+1]:
                     return False
         return True
 
@@ -182,24 +184,24 @@ def draw_game(game_state, screen, game_font, animation_time):
     screen.fill(background_color)
 
     # タイルを描画
-    for i in range(4):
-        for j in range(4):
-            value = game_state.board[i][j]
-            draw_tile(value, (i, j), screen, tile_font)
+    for current_row in range(BOARD_SIZE):
+        for source_column in range(BOARD_SIZE):
+            value = game_state.board[current_row][source_column]
+            draw_tile(value, (current_row, source_column), screen, tile_font)
 
     def ease_out_quad(x):
         return 1 - (1 - x) * (1 - x)
 
     # アニメーション中のタイルを描画
-    for value, move_start_pos, move_end_pos in game_state.moving_tiles:
-        value = game_state.previous_board[move_start_pos[0]][move_start_pos[1]]
+    for value, start_pos, end_pos in game_state.moving_tiles:
+        value = game_state.previous_board[start_pos[0]][start_pos[1]]
 
         # Calculate current position based on animation progress
         progress = min(1, animation_time / total_animation_time)
         eased_progress = ease_out_quad(progress)
         current_pos = (
-            move_start_pos[0] * (1 - eased_progress) + move_end_pos[0] * eased_progress,
-            move_start_pos[1] * (1 - eased_progress) + move_end_pos[1] * eased_progress
+            start_pos[0] * (1 - eased_progress) + end_pos[0] * eased_progress,
+            start_pos[1] * (1 - eased_progress) + end_pos[1] * eased_progress
         )
         draw_tile(value, (current_pos[1], current_pos[0]), screen, tile_font)
 
