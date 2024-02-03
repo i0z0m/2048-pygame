@@ -1,33 +1,50 @@
 import pygame
 import random
 import copy
+from dataclasses import dataclass
 
 # ゲームの初期化
 pygame.init()
-BOARD_SIZE = 4
-PANEL_SIZE = 100
-LAST_INDEX = BOARD_SIZE - 1
-size = BOARD_SIZE * PANEL_SIZE + 10
+BOARD_SIZE: int = 4
+PANEL_SIZE: int = 100
+LAST_INDEX: int = BOARD_SIZE - 1
+size: int = BOARD_SIZE * PANEL_SIZE + 10
 game_font = pygame.font.Font(None, 40)
 tile_font = pygame.font.Font(None, 60)
 screen = pygame.display.set_mode((size, size))
 pygame.display.set_caption("2048")
 
-# 色の定義
-background_color = (187, 173, 160)
+@dataclass
+class Color:
+    r: int
+    g: int
+    b: int
+
+    def __post_init__(self):
+        for color_value in (self.r, self.g, self.b):
+            if not 0 <= color_value <= 255:
+                raise ValueError("Color values must be between 0 and 255")
+
+    def __iter__(self):
+        yield self.r
+        yield self.g
+        yield self.b
+
+background_color: Color = Color(187, 173, 160)
+
 tile_colors = {
-    0: (205, 193, 180),
-    2: (238, 228, 218),
-    4: (237, 224, 200),
-    8: (242, 177, 121),
-    16: (245, 149, 99),
-    32: (246, 124, 95),
-    64: (246, 94, 59),
-    128: (237, 207, 114),
-    256: (237, 204, 97),
-    512: (237, 200, 80),
-    1024: (237, 197, 63),
-    2048: (237, 194, 46)
+    0: Color(205, 193, 180),
+    2: Color(238, 228, 218),
+    4: Color(237, 224, 200),
+    8: Color(242, 177, 121),
+    16: Color(245, 149, 99),
+    32: Color(246, 124, 95),
+    64: Color(246, 94, 59),
+    128: Color(237, 207, 114),
+    256: Color(237, 204, 97),
+    512: Color(237, 200, 80),
+    1024: Color(237, 197, 63),
+    2048: Color(237, 194, 46)
 }
 
 # ゲームの状態を表すクラス
@@ -170,7 +187,7 @@ animation_time = 0
 total_animation_time = 300
 
 def draw_tile(value, pos, screen, tile_font):
-    color = tile_colors[value]
+    color = tuple(tile_colors[value])
     pygame.draw.rect(screen, color, (pos[1] * PANEL_SIZE + 10, pos[0] * PANEL_SIZE + 10, PANEL_SIZE - 10, PANEL_SIZE - 10))
     if value != 0:
         text_color = (87, 79, 74) if value < 8 else (255, 255, 255)
@@ -179,7 +196,7 @@ def draw_tile(value, pos, screen, tile_font):
         screen.blit(text_surface, text_rect)
 
 def draw_game(game_state, screen, game_font, animation_time):
-    screen.fill(background_color)
+    screen.fill(tuple(background_color))
 
     # タイルを描画
     for current_row in range(BOARD_SIZE):
